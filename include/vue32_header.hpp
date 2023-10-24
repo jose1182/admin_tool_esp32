@@ -3,9 +3,6 @@
 // -------------------------------------------------------------------
 #define WIFILED 12                                      // GPIO12 LED WIFI
 #define MQTTLED 13                                      // GPIO13 LED MQTT
-#define SENSORLED 26                                      // GPIO14 LED SENSOR
-#define SELENOIDE 32                                      // GPIO14 LED SENSOR
-#define ADC_PIN 33
 
 // CALCULAR LA CAPACIDAD DEL JSON
 // Asistente ArduinoJson: https://arduinojson.org/v6/assistant/
@@ -67,7 +64,7 @@ boolean mqtt_time_send;             // Habilitar en envio de datos
 int     mqtt_time_interval;         // Tiempo de envio por MQTT en segundos
 boolean mqtt_status_send;           // Habilitar en envio de estados
 // -------------------------------------------------------------------
-// Zona Firmware Update TODO: Para La API REST
+// Zona Firmware Update
 // -------------------------------------------------------------------
 size_t  content_len;
 #define U_PART U_SPIFFS
