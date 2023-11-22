@@ -6,36 +6,41 @@ boolean settingsSave();
 // -------------------------------------------------------------------
 // Leer settings.json
 // -------------------------------------------------------------------
-boolean settingsRead(){
+boolean settingsRead()
+{
 
     DynamicJsonDocument jsonSettings(capacitySettings);
-    
+
     File file = SPIFFS.open("/settings.json", "r");
 
-    if(deserializeJson(jsonSettings, file)){
+    if (deserializeJson(jsonSettings, file))
+    {
         // Tomar los valores de Fábrica
         settingsReset();
         DeserializationError error = deserializeJson(jsonSettings, file);
         log("[ ERROR ] Falló la lectura de las configuraciones, tomando valores por defecto");
-        if(error){
+        if (error)
+        {
             log("[ ERROR ] " + String(error.c_str()));
         }
         return false;
-    }else{
+    }
+    else
+    {
         // -------------------------------------------------------------------
         // Dispositivo settings.json
         // -------------------------------------------------------------------
         device_config_file = jsonSettings["device_config_file"];
-        strlcpy(device_config_serial, jsonSettings["device_config_serial"],sizeof(device_config_serial));
-        strlcpy(device_id, jsonSettings["device_id"], sizeof(device_id)); 
-        strlcpy(device_old_user, jsonSettings["device_old_user"], sizeof(device_old_user)); 
-        strlcpy(device_old_password, jsonSettings["device_old_password"], sizeof(device_old_password)); 
+        strlcpy(device_config_serial, jsonSettings["device_config_serial"], sizeof(device_config_serial));
+        strlcpy(device_id, jsonSettings["device_id"], sizeof(device_id));
+        strlcpy(device_old_user, jsonSettings["device_old_user"], sizeof(device_old_user));
+        strlcpy(device_old_password, jsonSettings["device_old_password"], sizeof(device_old_password));
         // -------------------------------------------------------------------
         // WIFI Cliente settings.json
         // -------------------------------------------------------------------
         wifi_ip_static = jsonSettings["wifi_ip_static"];
         strlcpy(wifi_ssid, jsonSettings["wifi_ssid"], sizeof(wifi_ssid));
-        strlcpy(wifi_password, jsonSettings["wifi_password"], sizeof(wifi_password));        
+        strlcpy(wifi_password, jsonSettings["wifi_password"], sizeof(wifi_password));
         strlcpy(wifi_ipv4, jsonSettings["wifi_ipv4"], sizeof(wifi_ipv4));
         strlcpy(wifi_subnet, jsonSettings["wifi_subnet"], sizeof(wifi_subnet));
         strlcpy(wifi_gateway, jsonSettings["wifi_gateway"], sizeof(wifi_gateway));
@@ -75,23 +80,24 @@ boolean settingsRead(){
 // -------------------------------------------------------------------
 // Valores de Fábrica al settings.json
 // -------------------------------------------------------------------
-void settingsReset(){
+void settingsReset()
+{
     // -------------------------------------------------------------------
     // Dispositivo settings.json
     // -------------------------------------------------------------------
     device_config_file = true;
-    strlcpy(device_config_serial, deviceID().c_str() ,sizeof(device_config_serial));
+    strlcpy(device_config_serial, deviceID().c_str(), sizeof(device_config_serial));
     strlcpy(device_id, "adminvue32", sizeof(device_id));
-    strlcpy(device_old_user, "admin", sizeof(device_old_user)); 
-    strlcpy(device_old_password, "admin", sizeof(device_old_password));  
+    strlcpy(device_old_user, "admin", sizeof(device_old_user));
+    strlcpy(device_old_password, "admin", sizeof(device_old_password));
     // -------------------------------------------------------------------
     // WIFI Cliente settings.json
     // -------------------------------------------------------------------
     wifi_ip_static = false;
-    //strlcpy(wifi_ssid, "MOVISTAR_E82F", sizeof(wifi_ssid));
-    //strlcpy(wifi_password, "ED3A98227762FB3FEC7E", sizeof(wifi_password));
-    strlcpy(wifi_ssid, "TP-Link_CCD4", sizeof(wifi_ssid));
-    strlcpy(wifi_password, "66689850", sizeof(wifi_password));
+    // strlcpy(wifi_ssid, "MOVISTAR_E82F", sizeof(wifi_ssid));
+    // strlcpy(wifi_password, "ED3A98227762FB3FEC7E", sizeof(wifi_password));
+    strlcpy(wifi_ssid, "MOVISTAR_E82F", sizeof(wifi_ssid));
+    strlcpy(wifi_password, "ED3A98227762FB3FEC7E", sizeof(wifi_password));
     strlcpy(wifi_ipv4, "192.168.0.177", sizeof(wifi_ipv4));
     strlcpy(wifi_subnet, "255.255.255.0", sizeof(wifi_subnet));
     strlcpy(wifi_gateway, "192.168.0.1", sizeof(wifi_gateway));
@@ -103,17 +109,17 @@ void settingsReset(){
     ap_mode = false;
     strlcpy(ap_ssid, deviceID().c_str(), sizeof(ap_ssid));
     strlcpy(ap_password, "adminVUE32", sizeof(ap_password));
-    ap_visibility = false;        
-    ap_chanel = 9;         
+    ap_visibility = false;
+    ap_chanel = 9;
     ap_connect = 4;
     // -------------------------------------------------------------------
     // Cloud settings.json
     // -------------------------------------------------------------------
-    mqtt_cloud_enable = false;
+    mqtt_cloud_enable = true;
     strlcpy(mqtt_user, "superuser", sizeof(mqtt_user));
     strlcpy(mqtt_password, "superpass", sizeof(mqtt_password));
-    //strlcpy(mqtt_server, "192.168.1.136", sizeof(mqtt_server));
-    strlcpy(mqtt_server, "192.168.0.148", sizeof(mqtt_server));
+    // strlcpy(mqtt_server, "192.168.1.136", sizeof(mqtt_server));
+    strlcpy(mqtt_server, "192.168.1.137", sizeof(mqtt_server));
     strlcpy(mqtt_cloud_id, deviceID().c_str(), sizeof(mqtt_cloud_id));
     mqtt_port = 1883;
     mqtt_retain = false;
@@ -121,28 +127,30 @@ void settingsReset(){
     mqtt_time_send = true;
     mqtt_time_interval = 30000;
     mqtt_status_send = true;
-    log("[ INFO ] Se reiniciaron todos los valores por defecto");   
+    log("[ INFO ] Se reiniciaron todos los valores por defecto");
     //
-    analog_read_sensor = true;   
+    analog_read_sensor = true;
 }
 
 // -------------------------------------------------------------------
 // Guardar settings.json
 // -------------------------------------------------------------------
-boolean settingsSave(){
+boolean settingsSave()
+{
     // StaticJsonDocument<capacitySettings> jsonSettings;
     DynamicJsonDocument jsonSettings(capacitySettings);
-    
+
     File file = SPIFFS.open("/settings.json", "w+");
 
-    if (file){
+    if (file)
+    {
         // -------------------------------------------------------------------
         // Dispositivo settings.json
         // -------------------------------------------------------------------
         jsonSettings["device_config_file"] = device_config_file;
         jsonSettings["device_config_serial"] = device_config_serial;
         jsonSettings["device_id"] = device_id;
-        jsonSettings["device_old_user"] = device_old_user; 
+        jsonSettings["device_old_user"] = device_old_user;
         jsonSettings["device_old_password"] = device_old_password;
         // -------------------------------------------------------------------
         // WIFI Cliente settings.json
@@ -177,15 +185,17 @@ boolean settingsSave(){
         jsonSettings["mqtt_qos"] = mqtt_qos;
         jsonSettings["mqtt_time_send"] = mqtt_time_send;
         jsonSettings["mqtt_time_interval"] = mqtt_time_interval;
-        jsonSettings["mqtt_status_send"] = mqtt_status_send; 
+        jsonSettings["mqtt_status_send"] = mqtt_status_send;
         //
-        jsonSettings["analog_read_sensor"] = analog_read_sensor; 
+        jsonSettings["analog_read_sensor"] = analog_read_sensor;
         serializeJsonPretty(jsonSettings, file);
         file.close();
         log("[ INFO ] Configuración Guardada correctamente");
         serializeJsonPretty(jsonSettings, Serial);
         return true;
-    }else{
+    }
+    else
+    {
         log("[ ERROR ] Falló el guardado de la configuración");
         return false;
     }
