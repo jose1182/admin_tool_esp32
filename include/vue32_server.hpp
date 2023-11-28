@@ -552,14 +552,14 @@ void handleCloudJS(AsyncWebServerRequest *request)
     request->send(response);
 }
 // -------------------------------------------------------------------
-// Manejo de los Archivos del Servidor Web dashmix.js
+// Manejo de los Archivos del Servidor Web Error404.js
 // -------------------------------------------------------------------
-void handleDashmixJS(AsyncWebServerRequest *request)
+void handle404JS(AsyncWebServerRequest *request)
 {
     /*     if (!request->authenticate(device_old_user, device_old_password))
             return request->requestAuthentication(); */
     const char *dataType = "application/javascript";
-    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, dashmix_js, dashmix_js_length);
+    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, page404_js, page404_js_length);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
 }
@@ -588,86 +588,74 @@ void handleWifiJS(AsyncWebServerRequest *request)
     request->send(response);
 }
 // -------------------------------------------------------------------
-// Manejo de los Archivos del Servidor Web Error404.js
+// Manejo de los Archivos del Servidor Web Favicon.ico
 // -------------------------------------------------------------------
-void handle404JS(AsyncWebServerRequest *request)
+void handleFaviconICON(AsyncWebServerRequest *request)
 {
     /*     if (!request->authenticate(device_old_user, device_old_password))
             return request->requestAuthentication(); */
-    const char *dataType = "application/javascript";
-    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, page404_js, page404_length);
+    const char *dataType = "image/x-icon";
+    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, favicon_ico, favicon_ico_length);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
 }
 // -------------------------------------------------------------------
-// Manejo de los Archivos del Servidor Web Dashmix.css
+// Manejo de los Archivos del Servidor Web nucleo-icon.eot
 // -------------------------------------------------------------------
-void handleDashmixCSS(AsyncWebServerRequest *request)
+void handleXecoMinCSS(AsyncWebServerRequest *request)
 {
     /*     if (!request->authenticate(device_old_user, device_old_password))
             return request->requestAuthentication(); */
     const char *dataType = "text/css";
-    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, dashmix_css, dashmix_css_length);
+    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, xeco_min_css, xeco_min_css_length);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
 }
 // -------------------------------------------------------------------
-// Manejo de los Archivos del Servidor Web xeco.css Theme
+// Manejo de los Archivos del Servidor Web nucleo-icon.ttf
 // -------------------------------------------------------------------
-void handleXecoCSS(AsyncWebServerRequest *request)
+void handleSimplLineIconsWOFF2(AsyncWebServerRequest *request)
 {
     /*     if (!request->authenticate(device_old_user, device_old_password))
             return request->requestAuthentication(); */
-    const char *dataType = "text/css";
-    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, xeco_css, xeco_css_length);
+    const char *dataType = "font/woff2";
+    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, simple_line_icons_woff2, simple_line_icons_woff2_length);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
 }
 // -------------------------------------------------------------------
 // Manejo de los Archivos del Servidor Web Font fa.regular.woff2
 // -------------------------------------------------------------------
-void handleFaRegularWOFF2(AsyncWebServerRequest *request)
+void handleFaSolid900WOFF2(AsyncWebServerRequest *request)
 {
     /*     if (!request->authenticate(device_old_user, device_old_password))
             return request->requestAuthentication(); */
     const char *dataType = "font/woff2";
-    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, fa_regular_woff2, fa_regular_woff2_length);
+    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, fa_solid_900_woff2, fa_solid_900_woff2_length);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
 }
 // -------------------------------------------------------------------
 // Manejo de los Archivos del Servidor Web Font fa.solid.woff2
 // -------------------------------------------------------------------
-void handleFaSolidWOFF2(AsyncWebServerRequest *request)
+void handleFaRegular400WOFF2(AsyncWebServerRequest *request)
 {
     /*     if (!request->authenticate(device_old_user, device_old_password))
             return request->requestAuthentication(); */
     const char *dataType = "font/woff2";
-    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, fa_solid_woff2, fa_solid_woff2_length);
+    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, fa_regular_400_woff2, fa_regular_400_woff2_length);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
 }
 // -------------------------------------------------------------------
-// Manejo de los Archivos del Servidor Web Font Simple.Icon.woff2
+// Manejo de los Archivos del Servidor Web Font fa.solid.woff2
 // -------------------------------------------------------------------
-void handleSimpleIconWOFF2(AsyncWebServerRequest *request)
+void handleDashMinCSS(AsyncWebServerRequest *request)
 {
     /*     if (!request->authenticate(device_old_user, device_old_password))
             return request->requestAuthentication(); */
-    const char *dataType = "font/woff2";
-    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, Simple_Icons_woff2, Simple_Icons_woff2_length);
-    response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-}
-// -------------------------------------------------------------------
-// Manejo de los Archivos del Servidor Web Favicon.ico
-// -------------------------------------------------------------------
-void handleIcon(AsyncWebServerRequest *request)
-{
-    /*     if (!request->authenticate(device_old_user, device_old_password))
-            return request->requestAuthentication(); */
-    const char *dataType = "image/x-icon";
-    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, favicon_png, favicon_png_length);
+    const char *dataType = "text/css";
+    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, dashmix_min_css, dashmix_min_css_length);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
 }
@@ -862,14 +850,14 @@ void InitServer()
     // Método: PUT
     // -------------------------------------------------------------------
     server.on(
-        "/api/cloud/connection", HTTP_PUT, [](AsyncWebServerRequest *request) {}, NULL, putRequestCloudConnection);
+        "/api/cloud/connection", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, putRequestCloudConnection);
     // -------------------------------------------------------------------
     // Actualizar las configuraciones del Cloud Datos
     // url: /api/cloud/data
-    // Método: PUT
+    // Método: POST
     // -------------------------------------------------------------------
     server.on(
-        "/api/cloud/data", HTTP_PUT, [](AsyncWebServerRequest *request) {}, NULL, putRequestCloudData);
+        "/api/cloud/data", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, putRequestCloudData);
     // -------------------------------------------------------------------
     // Parámetros de Configuración del ID del Dispositivo y el Serial
     // url: /api/settings/id
@@ -894,17 +882,17 @@ void InitServer()
     // -------------------------------------------------------------------
     // Actualizar las configuraciones del ID del Dispositivo
     // url: /api/settings/id
-    // Método: PUT
+    // Método: POST
     // -------------------------------------------------------------------
     server.on(
-        "/api/settings/id", HTTP_PUT, [](AsyncWebServerRequest *request) {}, NULL, putRequestDeviceID);
+        "/api/settings/id", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, putRequestDeviceID);
     // -------------------------------------------------------------------
     // Actualizar las configuraciones del WWW Usuario y Contraseña
     // url: /api/settings/user
-    // Método: PUT
+    // Método: POST
     // -------------------------------------------------------------------
     server.on(
-        "/api/settings/user", HTTP_PUT, [](AsyncWebServerRequest *request) {}, NULL, putRequestUser);
+        "/api/settings/user", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, putRequestUser);
     // -------------------------------------------------------------------
     // Manejo de la descarga del Archivo setting.json
     // url: "/api/settings/download"
@@ -961,54 +949,45 @@ void InitServer()
     // -------------------------------------------------------------------
     server.on("/", HTTP_GET, handleIndex);
     // -------------------------------------------------------------------
+    // Cargar de Archivos complementarios ./img/favicon.ico
+    // -------------------------------------------------------------------
+    server.on("/favicon.ico", HTTP_GET, handleFaviconICON);     
+    // ----------------------------------------------------------
+    // -------------------------------------------------------------------
     // Cargar de Archivos complementarios ./js/app.js
     // -------------------------------------------------------------------
     server.on("/js/app.js", HTTP_GET, handleAppJS);
     // -------------------------------------------------------------------
     // Cargar de Archivos complementarios ./js/cloud.js
     // -------------------------------------------------------------------
-    server.on("/js/cloud.js", HTTP_GET, handleCloudJS);
-    // -------------------------------------------------------------------
-    // Cargar de Archivos complementarios ./js/dashmix.app.min.js
-    // -------------------------------------------------------------------
-    server.on("/js/dashmix.app.min.js", HTTP_GET, handleDashmixJS);
-    // -------------------------------------------------------------------
-    // Cargar de Archivos complementarios ./js/settings.js
-    // -------------------------------------------------------------------
-    server.on("/js/settings.js", HTTP_GET, handleSettingsJS);
-    // -------------------------------------------------------------------
-    // Cargar de Archivos complementarios ./js/wifi.js
-    // -------------------------------------------------------------------
-    server.on("/js/wifi.js", HTTP_GET, handleWifiJS);
+    server.on("/js/cloud.js", HTTP_GET, handleCloudJS); 
     // -------------------------------------------------------------------
     // Cargar de Archivos complementarios ./js/page404.js
     // -------------------------------------------------------------------
-    server.on("/js/page404.js", HTTP_GET, handle404JS);
+    server.on("/js/page404.js", HTTP_GET, handle404JS);      
     // -------------------------------------------------------------------
-    // Cargar de Archivos complementarios ./css/dashmix.min.css
+    // Cargar de Archivos complementarios ./js/settings.js
     // -------------------------------------------------------------------
-    server.on("/css/dashmix.min.css", HTTP_GET, handleDashmixCSS);
+    server.on("/js/settings.js", HTTP_GET, handleSettingsJS);    
     // -------------------------------------------------------------------
-    // Cargar de Archivos complementarios ./css/fa-regular-400.woff2
+    // Cargar de Archivos complementarios ./js/wifi.js
     // -------------------------------------------------------------------
-    server.on("/css/fa-regular-400.woff2", HTTP_GET, handleFaRegularWOFF2);
+    server.on("/js/wifi.js", HTTP_GET, handleWifiJS);   
+    // Cargar de Archivos complementarios ./font/nucleo-icons.eot
     // -------------------------------------------------------------------
-    // Cargar de Archivos complementarios ./css/fa-solid-900.woff2
+    server.on("/css/xeco.min.css", HTTP_GET, handleXecoMinCSS);
+    // Cargar de Archivos complementarios ./font/nucleo-icons.eot
     // -------------------------------------------------------------------
-    server.on("/css/fa-solid-900.woff2", HTTP_GET, handleFaSolidWOFF2);
+    server.on("/css/Simple-Line-Icons.woff2", HTTP_GET, handleSimplLineIconsWOFF2);
+    // Cargar de Archivos complementarios ./font/nucleo-icons.eot
     // -------------------------------------------------------------------
-    // Cargar de Archivos complementarios ./css/Simple-Line-Icons.woff2
+    server.on("/css/fa-solid-900.woff2", HTTP_GET, handleFaSolid900WOFF2);
+    // Cargar de Archivos complementarios ./font/nucleo-icons.eot
     // -------------------------------------------------------------------
-    server.on("/css/Simple-Line-Icons.woff2", HTTP_GET, handleSimpleIconWOFF2);
+    server.on("/css/fa-regular-400.woff2", HTTP_GET, handleFaRegular400WOFF2);
+        // Cargar de Archivos complementarios ./font/nucleo-icons.eot
     // -------------------------------------------------------------------
-    // Cargar de Archivos complementarios ./css/xeco.min.css
-    // -------------------------------------------------------------------
-    server.on("/css/xeco.min.css", HTTP_GET, handleXecoCSS);
-    // -------------------------------------------------------------------
-    // Cargar de Archivos complementarios ./img/favicon.png
-    // -------------------------------------------------------------------
-    server.on("/img/favicon.png", HTTP_GET, handleIcon);
-
+    server.on("/css/dashmix.min.css", HTTP_GET, handleDashMinCSS);
     // -------------------------------------------------------------------
     // Manejo del Error 404 página no encontrada
     // url: "desconocido"

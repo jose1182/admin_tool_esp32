@@ -51,6 +51,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
         String msg = "";
         if (info->final && info->index == 0 && info->len == len)
         {
+                        Serial.printf("I am here 0!");
             if (info->opcode == WS_TEXT)
             {
                 for (size_t i = 0; i < info->len; i++)
@@ -90,9 +91,10 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
                 }
             }
             Serial.printf("%s\n", msg.c_str());
-
+            Serial.printf("I am here!");
             if ((info->index + len) == info->len)
             {
+                            Serial.printf("I am here 2!");
                 if (info->final)
                 {
                     if (info->message_opcode == WS_TEXT)

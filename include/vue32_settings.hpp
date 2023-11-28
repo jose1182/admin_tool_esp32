@@ -96,8 +96,8 @@ void settingsReset()
     wifi_ip_static = false;
     // strlcpy(wifi_ssid, "MOVISTAR_E82F", sizeof(wifi_ssid));
     // strlcpy(wifi_password, "ED3A98227762FB3FEC7E", sizeof(wifi_password));
-    strlcpy(wifi_ssid, "MOVISTAR_E82F", sizeof(wifi_ssid));
-    strlcpy(wifi_password, "ED3A98227762FB3FEC7E", sizeof(wifi_password));
+    strlcpy(wifi_ssid, "TP-Link_CCD4", sizeof(wifi_ssid));
+    strlcpy(wifi_password, "66689850", sizeof(wifi_password));
     strlcpy(wifi_ipv4, "192.168.0.177", sizeof(wifi_ipv4));
     strlcpy(wifi_subnet, "255.255.255.0", sizeof(wifi_subnet));
     strlcpy(wifi_gateway, "192.168.0.1", sizeof(wifi_gateway));
@@ -115,7 +115,7 @@ void settingsReset()
     // -------------------------------------------------------------------
     // Cloud settings.json
     // -------------------------------------------------------------------
-    mqtt_cloud_enable = true;
+    mqtt_cloud_enable =false;
     strlcpy(mqtt_user, "superuser", sizeof(mqtt_user));
     strlcpy(mqtt_password, "superpass", sizeof(mqtt_password));
     // strlcpy(mqtt_server, "192.168.1.136", sizeof(mqtt_server));
