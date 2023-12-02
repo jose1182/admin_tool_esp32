@@ -576,6 +576,18 @@ void handleSettingsJS(AsyncWebServerRequest *request)
     request->send(response);
 }
 // -------------------------------------------------------------------
+// Manejo de los Archivos del Servidor Web Time.js
+// -------------------------------------------------------------------
+void handleTimeJS(AsyncWebServerRequest *request)
+{
+    /*     if (!request->authenticate(device_old_user, device_old_password))
+            return request->requestAuthentication(); */
+    const char *dataType = "application/javascript";
+    AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, time_js, time_js_length);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+}
+// -------------------------------------------------------------------
 // Manejo de los Archivos del Servidor Web Wifi.js
 // -------------------------------------------------------------------
 void handleWifiJS(AsyncWebServerRequest *request)
@@ -659,6 +671,58 @@ void handleDashMinCSS(AsyncWebServerRequest *request)
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
 }
+// -------------------------------------------------------------------
+// Método PUT Time
+// -------------------------------------------------------------------
+void putRequestTime(AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total){
+    /* if(!request->authenticate(device_old_user, device_old_password))
+        return request->requestAuthentication();  */   
+    const char* dataType = "application/json";
+
+    String bodyContent = GetBodyContent(data, len);  
+
+    StaticJsonDocument<320> doc;
+    DeserializationError error = deserializeJson(doc, bodyContent);
+    if (error) { 
+        request->send(400, dataType, "{ \"status\": \"Error de JSON enviado\" }");
+        return;
+    };
+    // -------------------------------------------------------------------
+    // Time settings.json
+    // -------------------------------------------------------------------
+    String s = "";    
+    // Manual - Internet true/false
+    time_ajuste = doc["time_ajuste"].as<bool>();
+    // Fecha - Hora
+    if(doc["time_date"] != ""){
+        s = doc["time_date"].as<String>();
+        s.trim();
+        strlcpy(time_date, s.c_str(), sizeof(time_date));
+        s = "";
+    }
+    // Numero de la zona Horaria
+    if(doc["time_z_horaria"] != ""){
+        time_z_horaria = doc["time_z_horaria"].as<float>()*3600;
+    }
+    // Servidor NTP
+    if(doc["time_server"] != ""){
+        s = doc["time_server"].as<String>();
+        s.trim();
+        strlcpy(time_server, s.c_str(), sizeof(time_server));
+        s = "";
+    }
+    
+    // Save Settings.json
+    if (settingsSave()){
+        request->send(200, dataType, "{ \"save\": true }");   
+        log("[ INFO ] Time Set OK");
+        // Esperar la Transmisión de los datos seriales
+        Serial.flush(); 
+        ESP.restart();     
+    }else{
+        request->send(500, dataType, "{ \"save\": false }");
+    }     
+}
 void InitServer()
 {
     // -------------------------------------------------------------------
@@ -680,6 +744,7 @@ void InitServer()
     // /api/settings/upload           POST
     // /api/settings/firmware         POST
     // /api/settings/logout           DELETE
+    // /api/time                      GET
     // -------------------------------------------------------------------
 
     // -------------------------------------------------------------------
@@ -940,6 +1005,36 @@ void InitServer()
             return request->requestAuthentication(); */
         request->send(401, "application/json", "{ \"session\": false, \"msg\": \"Sesión cerrada correctamente\"}"); });
     // -------------------------------------------------------------------
+    // Parametros de configuración del tiempo
+    // url: "/api/time"
+    // Método: GET
+    // -------------------------------------------------------------------
+    server.on("/api/time", HTTP_GET, [](AsyncWebServerRequest *request){
+        /* if(!request->authenticate(device_old_user, device_old_password)) 
+            return request->requestAuthentication(); */
+        const char* dataType = "application/json"; 
+        String json = "";
+        json = "{";
+        json += "\"meta\": { \"serial\": \"" + deviceID() + "\"},";
+        json += "\"data\":";
+            json += "{";       
+                time_ajuste ? json += "\"time_ajuste\": true" : json += "\"time_ajuste\": false";
+                json += ",\"time_date\": \""+ String(time_date) + "\""; //2022-09-07T23:47
+                json += ",\"time_z_horaria\": \"" + String(time_z_horaria) + "\"";    
+                json += ",\"time_server\": \""+ String(time_server) + "\""; 
+            json += "},";  
+        json += "\"code\": 1 ";
+        json += "}";    
+        request->send(200, dataType, json);
+    });
+    // -------------------------------------------------------------------
+    // Parámetros de Configuración del Tiempo guardar cambios
+    // url: /api/time
+    // Método: POST
+    // -------------------------------------------------------------------
+    server.on("/api/time", HTTP_POST, [](AsyncWebServerRequest * request){}, NULL, putRequestTime);
+
+    // -------------------------------------------------------------------
     // Zona Servidor Web VUE
     // -------------------------------------------------------------------
     // -------------------------------------------------------------------
@@ -969,6 +1064,10 @@ void InitServer()
     // Cargar de Archivos complementarios ./js/settings.js
     // -------------------------------------------------------------------
     server.on("/js/settings.js", HTTP_GET, handleSettingsJS);    
+    // -------------------------------------------------------------------
+    // Cargar de Archivos complementarios ./js/time.js
+    // -------------------------------------------------------------------
+    server.on("/js/time.js", HTTP_GET, handleTimeJS);   
     // -------------------------------------------------------------------
     // Cargar de Archivos complementarios ./js/wifi.js
     // -------------------------------------------------------------------

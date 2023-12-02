@@ -69,7 +69,16 @@ boolean settingsRead()
         mqtt_time_send = jsonSettings["mqtt_time_send"];
         mqtt_time_interval = jsonSettings["mqtt_time_interval"];
         mqtt_status_send = jsonSettings["mqtt_status_send"];
-        //
+        // -------------------------------------------------------------------
+        // Time settings.json
+        // -------------------------------------------------------------------
+        time_ajuste = jsonSettings["time_ajuste"];
+        strlcpy(time_date, jsonSettings["time_date"], sizeof(time_date));
+        time_z_horaria = jsonSettings["time_z_horaria"];
+        strlcpy(time_server, jsonSettings["time_server"], sizeof(time_server));
+        // -------------------------------------------------------------------
+        // application settings.json
+        // -------------------------------------------------------------------
         analog_read_sensor = jsonSettings["analog_read_sensor"];
 
         file.close();
@@ -127,6 +136,15 @@ void settingsReset()
     mqtt_time_send = true;
     mqtt_time_interval = 30000;
     mqtt_status_send = true;
+
+    // -------------------------------------------------------------------
+    // Time settings.json
+    // -------------------------------------------------------------------
+    time_ajuste = true;
+    strlcpy(time_date, "2022-09-22T00:00", sizeof(time_date));
+    time_z_horaria = -14400;
+    strlcpy(time_server, "ntp.roa.es", sizeof(time_server));
+    
     log("[ INFO ] Se reiniciaron todos los valores por defecto");
     //
     analog_read_sensor = true;
@@ -186,8 +204,19 @@ boolean settingsSave()
         jsonSettings["mqtt_time_send"] = mqtt_time_send;
         jsonSettings["mqtt_time_interval"] = mqtt_time_interval;
         jsonSettings["mqtt_status_send"] = mqtt_status_send;
-        //
+        // -------------------------------------------------------------------
+        // TIME settings.json
+        // -------------------------------------------------------------------
+        jsonSettings["time_ajuste"] = time_ajuste;
+        jsonSettings["time_date"] = time_date;
+        jsonSettings["time_z_horaria"] = time_z_horaria;
+        jsonSettings["time_server"] = time_server;
+
+        // -------------------------------------------------------------------
+        // Application settings.json
+        // -------------------------------------------------------------------
         jsonSettings["analog_read_sensor"] = analog_read_sensor;
+
         serializeJsonPretty(jsonSettings, file);
         file.close();
         log("[ INFO ] Configuración Guardada correctamente");

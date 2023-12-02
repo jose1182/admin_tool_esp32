@@ -32,6 +32,8 @@ char    device_old_password[15];    // Contraseña del usuario servidor Web
 // -------------------------------------------------------------------
 // Zona configuración WIFI modo Cliente
 // -------------------------------------------------------------------
+int wifi_mode = WIFI_STA;
+
 boolean wifi_ip_static;             // Uso de IP Estática DHCP
 char    wifi_ssid[30];              // Nombre de la red WiFi                 
 char    wifi_password[30];          // Contraseña de la Red WiFi 
@@ -73,5 +75,28 @@ size_t  content_len;
 // -------------------------------------------------------------------
 #define Start_Address 0
 #define Restart_Address Start_Address + sizeof(int)
-//
+// -------------------------------------------------------------------
+// Zona TIME
+// -------------------------------------------------------------------
+ESP32Time rtc;                          //Clase ESP32Time
+
+bool time_ajuste;                       //0 - Manual - 1 - Automático internet SRV NTP
+char time_date[18];                     // 2023-11-28T10:35
+long time_z_horaria;                    // Zona Horaria GMT 0 = 0 - GMT +1/4 = 3600*4 - GMT -1 = -3600
+char time_server[39];                   //Servidor NTP Ejemplo: time.nist.gov
+
+int time_hr;                            // Hora 0 - 23
+int time_mn;                            // Minutos 0 -59
+int time_sc;                            // Segundos 0 - 59
+int time_dy;                            // Días 1 -31
+int time_mt;                            // Meses 1 -12
+int time_yr;                            // Año 2023
+
+//NTP Server
+WiFiUDP ntpUDP;
+NTPClient ntpClient(ntpUDP);
+
+long lastTime  = 0;                     //Variable para tiempo de envio por WS
+
+
 bool analog_read_sensor;

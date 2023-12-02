@@ -5,6 +5,14 @@
 #include <TimeLib.h>
 #include <DNSServer.h>
 #include <ESPmDNS.h>
+#include <WiFi.h>
+#include <DNSServer.h>
+#include <ESPmDNS.h> 
+
+//Libreria para el RCT de ESP32
+#include <ESP32Time.h>
+//Librería para NTP
+#include <NTPClient.h>
 
 // -------------------------------------------------------------------
 // Archivos *.hpp - Fragmentar el Código
@@ -51,6 +59,8 @@ void setup()
   settingPines();
   // Setup WIFI
   wifi_setup();
+  //Setup TIME
+  timeSetup();
   // Inicializacion del Servidor WEB
   InitServer();
   // Inicializamos el WS
@@ -102,5 +112,14 @@ void loop()
     lastWsSend = millis();
     WsMessage(getJsonIndex(), "", "");
   }
-  //
+  // -------------------------------------------------------------------
+  // RTC & NTP
+  // -------------------------------------------------------------------
+  if((WiFi.status() == WL_CONNECTED) && (wifi_mode == WIFI_STA)){
+    ntpClient.update();    
+  }
+  if (millis() - lastTime > 1000){
+    lastTime = millis();
+    WsMessage(getSendJson(getDateTime(), "time"), "", "");
+  }
 }
