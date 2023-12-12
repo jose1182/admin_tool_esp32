@@ -77,9 +77,23 @@ boolean settingsRead()
         time_z_horaria = jsonSettings["time_z_horaria"];
         strlcpy(time_server, jsonSettings["time_server"], sizeof(time_server));
         // -------------------------------------------------------------------
-        // application settings.json
+        // iSumotex settings.json
         // -------------------------------------------------------------------
-        analog_read_sensor = jsonSettings["analog_read_sensor"];
+        PRESSURE_TARGET = jsonSettings["PRESSURE_TARGET"];
+        PRESSURE_THRESHOLD_HIGH = jsonSettings["PRESSURE_THRESHOLD_HIGH"];
+        PRESSURE_THRESHOLD_LOW = jsonSettings["PRESSURE_THRESHOLD_LOW"];
+        PRESSURE_TOLERANCE = jsonSettings["PRESSURE_TOLERANCE"];
+        THRESHOLD_WITHOUT_PRESSURE = jsonSettings["THRESHOLD_WITHOUT_PRESSURE"];
+        WARNING_LIMIT = jsonSettings["WARNING_LIMIT"].as<int>();
+        MAX_VALVE_OPEN_COUNT = jsonSettings["MAX_VALVE_OPEN_COUNT"].as<int>();
+        MONITORING_ENABLED = jsonSettings["MONITORING_ENABLED"].as<bool>();
+        VALVE_OPEN_DURATION = jsonSettings["VALVE_OPEN_DURATION"].as<int>();
+        TIMEOUT_CHECK_PRESSURE = jsonSettings["TIMEOUT_CHECK_PRESSURE"].as<int>();
+        RETRY_OPEN_VALVE = jsonSettings["RETRY_OPEN_VALVE"].as<int>();
+        // -------------------------------------------------------------------
+        // temporal settings.json
+        // -------------------------------------------------------------------
+        // analog_read_sensor = jsonSettings["analog_read_sensor"];
 
         file.close();
         log("[ INFO ] Lectura de las configuraciones correcta");
@@ -124,7 +138,7 @@ void settingsReset()
     // -------------------------------------------------------------------
     // Cloud settings.json
     // -------------------------------------------------------------------
-    mqtt_cloud_enable =false;
+    mqtt_cloud_enable = false;
     strlcpy(mqtt_user, "superuser", sizeof(mqtt_user));
     strlcpy(mqtt_password, "superpass", sizeof(mqtt_password));
     // strlcpy(mqtt_server, "192.168.1.136", sizeof(mqtt_server));
@@ -144,7 +158,21 @@ void settingsReset()
     strlcpy(time_date, "2022-09-22T00:00", sizeof(time_date));
     time_z_horaria = -14400;
     strlcpy(time_server, "ntp.roa.es", sizeof(time_server));
-    
+    // -------------------------------------------------------------------
+    // iSumotex settings.json
+    // -------------------------------------------------------------------
+    PRESSURE_TARGET = 2.0;            // Valor objetivo de presión en bares
+    PRESSURE_THRESHOLD_HIGH = 2.0;    // Umbral de presión alta en bares
+    PRESSURE_THRESHOLD_LOW = 1.8;     // Umbral de presión baja en bares
+    PRESSURE_TOLERANCE = 0.1;         // Tolerancia de presión en bares
+    THRESHOLD_WITHOUT_PRESSURE = 1.0; // Minima presion sin aire
+    WARNING_LIMIT = 5;                // Límite de advertencias antes de considerar que la manguera es defectuosa
+    MAX_VALVE_OPEN_COUNT = 5;
+    MONITORING_ENABLED = false;
+    VALVE_OPEN_DURATION = 10000;
+    TIMEOUT_CHECK_PRESSURE = 30000;
+    RETRY_OPEN_VALVE = 5;
+
     log("[ INFO ] Se reiniciaron todos los valores por defecto");
     //
     analog_read_sensor = true;
@@ -211,6 +239,20 @@ boolean settingsSave()
         jsonSettings["time_date"] = time_date;
         jsonSettings["time_z_horaria"] = time_z_horaria;
         jsonSettings["time_server"] = time_server;
+        // -------------------------------------------------------------------
+        // Isumotex settings.json
+        // -------------------------------------------------------------------
+        jsonSettings["PRESSURE_TARGET"] = PRESSURE_TARGET;
+        jsonSettings["PRESSURE_THRESHOLD_HIGH"] = PRESSURE_THRESHOLD_HIGH;
+        jsonSettings["PRESSURE_THRESHOLD_LOW"] = PRESSURE_THRESHOLD_LOW;
+        jsonSettings["PRESSURE_TOLERANCE"] = PRESSURE_TOLERANCE;
+        jsonSettings["THRESHOLD_WITHOUT_PRESSURE"] = THRESHOLD_WITHOUT_PRESSURE;
+        jsonSettings["WARNING_LIMIT"] = WARNING_LIMIT;
+        jsonSettings["MAX_VALVE_OPEN_COUNT"] = MAX_VALVE_OPEN_COUNT;
+        jsonSettings["MONITORING_ENABLED"] = MONITORING_ENABLED;
+        jsonSettings["VALVE_OPEN_DURATION"] = VALVE_OPEN_DURATION;
+        jsonSettings["TIMEOUT_CHECK_PRESSURE"] = TIMEOUT_CHECK_PRESSURE;
+        jsonSettings["RETRY_OPEN_VALVE"] = RETRY_OPEN_VALVE;
 
         // -------------------------------------------------------------------
         // Application settings.json
