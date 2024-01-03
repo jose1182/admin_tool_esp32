@@ -43,7 +43,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     }
     else if (type == WS_EVT_PONG)
     {
-        // Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len)?(char*)data:"");
+         //Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len)?(char*)data:"");
     }
     else if (type == WS_EVT_DATA)
     {
@@ -51,7 +51,6 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
         String msg = "";
         if (info->final && info->index == 0 && info->len == len)
         {
-                        Serial.printf("I am here 0!");
             if (info->opcode == WS_TEXT)
             {
                 for (size_t i = 0; i < info->len; i++)
@@ -91,10 +90,8 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
                 }
             }
             Serial.printf("%s\n", msg.c_str());
-            Serial.printf("I am here!");
             if ((info->index + len) == info->len)
             {
-                            Serial.printf("I am here 2!");
                 if (info->final)
                 {
                     if (info->message_opcode == WS_TEXT)
@@ -141,9 +138,15 @@ void ProcessRequest(AsyncWebSocketClient *client, String request)
         Serial.flush();
         ESP.restart();
     }
+    else if (strcmp(command.c_str(), "ping") == 0)
+    {
+        log("[ INFO ] Ping por WS => " + command);
+        WsMessage(getSendJson("ok","pong"),"","");
+        log("[ INFO ] ¡Ping con el cliente correcto!");
+    }
     else
     {
-        // OnOffRelays(command);
+        OnOffRelays(command);
     }
 }
 // -------------------------------------------------------------------
@@ -182,6 +185,8 @@ String getJsonIndex()
     jsonDoc["wifi_online"] = WiFi.status() == WL_CONNECTED ? true : false;
     jsonDoc["wifi_rssi"] = WiFi.status() == WL_CONNECTED ? WiFi.RSSI() : 0;
     jsonDoc["wifi_signal"] = WiFi.status() == WL_CONNECTED ? getRSSIasQuality(WiFi.RSSI()) : 0;
+    jsonDoc["val_ai_sensor_0"] = enable_ai_sensor_0? readPressure(): 0.00;
+    jsonDoc["val_ai_sensor_1"] = enable_ai_sensor_1? 0.00 + (2.10 - 1.50) * random(0, 10000)/10000.0: 0.00;
     serializeJson(jsonDoc, response);
     return response;
 }

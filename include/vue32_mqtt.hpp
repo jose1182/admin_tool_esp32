@@ -10,9 +10,10 @@ String mqtt_data = "";
 long lastMqttReconnectAttempt = 0;
 long lastMsg = 0;
 
+//Funnnnnctions definitons
 void callback(char *topic, byte *payload, unsigned int length);
-
 String Json();
+void OnOffRelays(String commnad);
 
 char willTopic[150];
 bool willQoS = 0;
@@ -112,6 +113,9 @@ void callback(char *topic, byte *payload, unsigned int length)
     mensaje.trim();
     log("[ INFO ] Topico -->" + str_topic);
     log("[ INFO ] Mensaje -->" + mensaje);
+
+    // send commenad of out messages
+    OnOffRelays(mensaje);
 }
 // -------------------------------------------------------------------
 // Manejo de los Mensajes Salientes

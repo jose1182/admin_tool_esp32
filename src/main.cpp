@@ -23,7 +23,10 @@
 #include "vue32_wifi.hpp"
 #include "vue32_mqtt.hpp"
 #include "vue32_server.hpp"
+#include "vue32_isumotex.hpp"
 #include "vue32_websockets.hpp"
+#include "vue32_relays.hpp"
+
 
 // -------------------------------------------------------------------
 // Setup
@@ -61,10 +64,14 @@ void setup()
   wifi_setup();
   // Setup TIME
   timeSetup();
+  // Iniciar Relays
+  setupPinRelay();
   // Inicializacion del Servidor WEB
   InitServer();
   // Inicializamos el WS
   InitWebSockets();
+  // Inicializamos Isumotex
+  isumotex_setup();
   // Fin del Setup
   log("[ INFO ] Setup completado");
 }
@@ -123,5 +130,11 @@ void loop()
   {
     lastTime = millis();
     WsMessage(getSendJson(getDateTime(), "time"), "", "");
+  }
+
+  if (millis() - lastSample >= 100) //  almost exact 860 SPS
+  {
+    lastSample = millis();
+    readPressure();
   }
 }

@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "cmath": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/home/vboxuser/Software/Arduino/admin_tool_esp32/.pio/libdeps/esp32dev/ArduinoJson"
 }

@@ -77,7 +77,7 @@ boolean settingsRead()
         time_z_horaria = jsonSettings["time_z_horaria"];
         strlcpy(time_server, jsonSettings["time_server"], sizeof(time_server));
         // -------------------------------------------------------------------
-        // iSumotex settings.json
+        // iSumotex paramters settings.json
         // -------------------------------------------------------------------
         PRESSURE_TARGET = jsonSettings["PRESSURE_TARGET"];
         PRESSURE_THRESHOLD_HIGH = jsonSettings["PRESSURE_THRESHOLD_HIGH"];
@@ -90,6 +90,33 @@ boolean settingsRead()
         VALVE_OPEN_DURATION = jsonSettings["VALVE_OPEN_DURATION"].as<int>();
         TIMEOUT_CHECK_PRESSURE = jsonSettings["TIMEOUT_CHECK_PRESSURE"].as<int>();
         RETRY_OPEN_VALVE = jsonSettings["RETRY_OPEN_VALVE"].as<int>();
+        // -------------------------------------------------------------------
+        // iSumotex i/o settings.json
+        // -------------------------------------------------------------------
+        type_sensor_ai_0        = jsonSettings["io"]["analog"]["ai_0"][0];
+        type_sensor_ai_1        = jsonSettings["io"]["analog"]["a2_0"][0];
+        val_ai_sensor_0         = jsonSettings["io"]["analog"]["ai_0"][1];
+        val_ai_sensor_1         = jsonSettings["io"]["analog"]["a2_0"][1];
+        enable_ai_sensor_0      = jsonSettings["io"]["analog"]["ai_0"][2].as<bool>();
+        enable_ai_sensor_1      = jsonSettings["io"]["analog"]["a2_0"][2].as<bool>();
+        name_sensor_di_0        = jsonSettings["io"]["input"]["di_0"][0].as<String>();
+        name_sensor_di_1        = jsonSettings["io"]["input"]["di_1"][0].as<String>();
+        status_di_sensor_0      = jsonSettings["io"]["input"]["di_0"][1].as<bool>();
+        status_di_sensor_1      = jsonSettings["io"]["input"]["di_1"][1].as<bool>();
+        enable_di_sensor_0      = jsonSettings["io"]["input"]["di_0"][2].as<bool>();
+        enable_di_sensor_1      = jsonSettings["io"]["input"]["di_1"][2].as<bool>();
+        name_sensor_do[0]       = jsonSettings["io"]["relay"]["do_0"][0].as<String>();
+        name_sensor_do[1]       = jsonSettings["io"]["relay"]["do_1"][0].as<String>();
+        name_sensor_do[2]       = jsonSettings["io"]["relay"]["do_2"][0].as<String>();
+        name_sensor_do[3]       = jsonSettings["io"]["relay"]["do_3"][0].as<String>();
+        activate_do_sensor[0]   = jsonSettings["io"]["relay"]["do_0"][1].as<bool>();
+        activate_do_sensor[1]   = jsonSettings["io"]["relay"]["do_1"][1].as<bool>();
+        activate_do_sensor[2]   = jsonSettings["io"]["relay"]["do_2"][1].as<bool>();
+        activate_do_sensor[3]   = jsonSettings["io"]["relay"]["do_3"][1].as<bool>();
+        enable_do_sensor[0]     = jsonSettings["io"]["relay"]["do_0"][2].as<bool>();
+        enable_do_sensor[1]     = jsonSettings["io"]["relay"]["do_1"][2].as<bool>();
+        enable_do_sensor[2]     = jsonSettings["io"]["relay"]["do_2"][2].as<bool>();
+        enable_do_sensor[3]     = jsonSettings["io"]["relay"]["do_3"][2].as<bool>();
         // -------------------------------------------------------------------
         // temporal settings.json
         // -------------------------------------------------------------------
@@ -142,7 +169,7 @@ void settingsReset()
     strlcpy(mqtt_user, "superuser", sizeof(mqtt_user));
     strlcpy(mqtt_password, "superpass", sizeof(mqtt_password));
     // strlcpy(mqtt_server, "192.168.1.136", sizeof(mqtt_server));
-    strlcpy(mqtt_server, "192.168.1.137", sizeof(mqtt_server));
+    strlcpy(mqtt_server, "192.168.0.148", sizeof(mqtt_server));
     strlcpy(mqtt_cloud_id, deviceID().c_str(), sizeof(mqtt_cloud_id));
     mqtt_port = 1883;
     mqtt_retain = false;
@@ -172,7 +199,38 @@ void settingsReset()
     VALVE_OPEN_DURATION = 10000;
     TIMEOUT_CHECK_PRESSURE = 30000;
     RETRY_OPEN_VALVE = 5;
+    // -------------------------------------------------------------------
+    // iSumotex i/o settings.json
+    // -------------------------------------------------------------------
+    // Variables Analog inputs
+    type_sensor_ai_0 = 0;
+    type_sensor_ai_1 = 0;
 
+    val_ai_sensor_0 = 0.0;
+    val_ai_sensor_1 = 0.0;
+    enable_ai_sensor_0 = false;
+    enable_ai_sensor_1 = false;
+    // Variables Digital inputs
+    name_sensor_di_0        = "Name tag sensor di_0";
+    name_sensor_di_1        = "Name tag sensor di_1";
+    status_di_sensor_0      = false;
+    status_di_sensor_1      = false;
+    enable_di_sensor_0      = false;
+    enable_di_sensor_1      = false;
+    // Variables Digital outputs
+    name_sensor_do[0]          = "Name tag sensor d0_0";
+    name_sensor_do[1]          = "Name tag sensor d0_1";
+    name_sensor_do[2]          = "Name tag sensor d0_2";
+    name_sensor_do[3]          = "Name tag sensor d0_3";
+    activate_do_sensor[0]   = false;
+    activate_do_sensor[1]   = false;
+    activate_do_sensor[2]   = false;
+    activate_do_sensor[3]   = false;
+    enable_do_sensor[0]     = false;
+    enable_do_sensor[1]     = false;
+    enable_do_sensor[2]     = false;
+    enable_do_sensor[3]     = false;
+    
     log("[ INFO ] Se reiniciaron todos los valores por defecto");
     //
     analog_read_sensor = true;
@@ -253,7 +311,33 @@ boolean settingsSave()
         jsonSettings["VALVE_OPEN_DURATION"] = VALVE_OPEN_DURATION;
         jsonSettings["TIMEOUT_CHECK_PRESSURE"] = TIMEOUT_CHECK_PRESSURE;
         jsonSettings["RETRY_OPEN_VALVE"] = RETRY_OPEN_VALVE;
-
+        // -------------------------------------------------------------------
+        // iSumotex i/o settings.json
+        // -------------------------------------------------------------------
+        jsonSettings["io"]["analog"]["ai_0"][0]   = type_sensor_ai_0;    
+        jsonSettings["io"]["analog"]["a2_0"][0]   = type_sensor_ai_1;    
+        jsonSettings["io"]["analog"]["ai_0"][1]   = val_ai_sensor_0;     
+        jsonSettings["io"]["analog"]["a2_0"][1]   = val_ai_sensor_1;     
+        jsonSettings["io"]["analog"]["ai_0"][2]   = enable_ai_sensor_0;  
+        jsonSettings["io"]["analog"]["a2_0"][2]   = enable_ai_sensor_1;  
+        jsonSettings["io"]["input"]["di_0"][0]    = name_sensor_di_0;    
+        jsonSettings["io"]["input"]["di_1"][0]    = name_sensor_di_1;    
+        jsonSettings["io"]["input"]["di_0"][1]    = status_di_sensor_0;  
+        jsonSettings["io"]["input"]["di_1"][1]    = status_di_sensor_1;  
+        jsonSettings["io"]["input"]["di_0"][2]    = enable_di_sensor_0;  
+        jsonSettings["io"]["input"]["di_1"][2]    = enable_di_sensor_1;  
+        jsonSettings["io"]["relay"]["do_0"][0]    = name_sensor_do[0];       
+        jsonSettings["io"]["relay"]["do_1"][0]    = name_sensor_do[1];       
+        jsonSettings["io"]["relay"]["do_2"][0]    = name_sensor_do[2];       
+        jsonSettings["io"]["relay"]["do_3"][0]    = name_sensor_do[3];      
+        jsonSettings["io"]["relay"]["do_0"][1]    = activate_do_sensor[0];
+        jsonSettings["io"]["relay"]["do_1"][1]    = activate_do_sensor[1];
+        jsonSettings["io"]["relay"]["do_2"][1]    = activate_do_sensor[2];
+        jsonSettings["io"]["relay"]["do_3"][1]    = activate_do_sensor[3];
+        jsonSettings["io"]["relay"]["do_0"][2]    = enable_do_sensor[0];  
+        jsonSettings["io"]["relay"]["do_1"][2]    = enable_do_sensor[1];  
+        jsonSettings["io"]["relay"]["do_2"][2]    = enable_do_sensor[2];  
+        jsonSettings["io"]["relay"]["do_3"][2]    = enable_do_sensor[3];                          
         // -------------------------------------------------------------------
         // Application settings.json
         // -------------------------------------------------------------------

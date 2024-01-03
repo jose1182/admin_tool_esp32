@@ -512,43 +512,190 @@ void handleDoFirmware(AsyncWebServerRequest *request, const String &filename, si
         }
     }
 }
+// -------------------------------------------------------------------
+// Método PUT Time
+// -------------------------------------------------------------------
+void putRequestTime(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+    /* if(!request->authenticate(device_old_user, device_old_password))
+        return request->requestAuthentication();  */
+    const char *dataType = "application/json";
 
+    String bodyContent = GetBodyContent(data, len);
+
+    StaticJsonDocument<320> doc;
+    DeserializationError error = deserializeJson(doc, bodyContent);
+    if (error)
+    {
+        request->send(400, dataType, "{ \"status\": \"Error de JSON enviado\" }");
+        return;
+    };
+    // -------------------------------------------------------------------
+    // Time settings.json
+    // -------------------------------------------------------------------
+    String s = "";
+    // Manual - Internet true/false
+    time_ajuste = doc["time_ajuste"].as<bool>();
+    // Fecha - Hora
+    if (doc["time_date"] != "")
+    {
+        s = doc["time_date"].as<String>();
+        s.trim();
+        strlcpy(time_date, s.c_str(), sizeof(time_date));
+        s = "";
+    }
+    // Numero de la zona Horaria
+    if (doc["time_z_horaria"] != "")
+    {
+        time_z_horaria = doc["time_z_horaria"].as<float>() * 3600;
+    }
+    // Servidor NTP
+    if (doc["time_server"] != "")
+    {
+        s = doc["time_server"].as<String>();
+        s.trim();
+        strlcpy(time_server, s.c_str(), sizeof(time_server));
+        s = "";
+    }
+
+    // Save Settings.json
+    if (settingsSave())
+    {
+        request->send(200, dataType, "{ \"save\": true }");
+        log("[ INFO ] Time Set OK");
+        // Esperar la Transmisión de los datos seriales
+        Serial.flush();
+        ESP.restart();
+    }
+    else
+    {
+        request->send(500, dataType, "{ \"save\": false }");
+    }
+}
+// -------------------------------------------------------------------
+// Método POST iSumotex thresholds
+// -------------------------------------------------------------------
 void putRequestThresholds(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
 {
     /* if(!request->authenticate(device_old_user, device_old_password))
         return request->requestAuthentication(); */
     const char *dataType = "application/json";
     String bodyContent = GetBodyContent(data, len);
-    StaticJsonDocument<768> doc;
+    StaticJsonDocument<1536> doc;
     DeserializationError error = deserializeJson(doc, bodyContent);
     if (error)
-     {
-         request->send(400, dataType, "{ \"status\": \"Error de JSON enviado\" }");
-         return;
-     };
-      JsonObject data_threshodls = doc["data"]["thresholds"];// DOC = data.threshodls
-      //serializeJsonPretty(data_threshodls, Serial);
+    {
+        request->send(400, dataType, "{ \"status\": \"Error de JSON enviado\" }");
+        return;
+    };
+    JsonObject data_threshodls = doc["data"]["thresholds"]; // DOC = data.threshodls
+                                                            // serializeJsonPretty(data_threshodls, Serial);
     //   -------------------------------------------------------------------
     //   Cloud Conexión settings.json
     //   -------------------------------------------------------------------
 
-    // MQTT User
-    // if (data_threshodls["data_threshodls"] != 0.0)
-    //{
+    PRESSURE_TARGET = data_threshodls["PRESSURE_TARGET"];
+    PRESSURE_THRESHOLD_HIGH = data_threshodls["PRESSURE_THRESHOLD_HIGH"];
+    PRESSURE_THRESHOLD_LOW = data_threshodls["PRESSURE_THRESHOLD_LOW"];
+    PRESSURE_TOLERANCE = data_threshodls["PRESSURE_TOLERANCE"];
+    THRESHOLD_WITHOUT_PRESSURE = data_threshodls["THRESHOLD_WITHOUT_PRESSURE"];
+    WARNING_LIMIT = data_threshodls["WARNING_LIMIT"].as<int>();
+    MAX_VALVE_OPEN_COUNT = data_threshodls["MAX_VALVE_OPEN_COUNT"].as<int>();
+    MONITORING_ENABLED = data_threshodls["MONITORING_ENABLED"].as<bool>();
 
-        PRESSURE_TARGET = data_threshodls["PRESSURE_TARGET"];
-        PRESSURE_THRESHOLD_HIGH = data_threshodls["PRESSURE_THRESHOLD_HIGH"];
-        PRESSURE_THRESHOLD_LOW = data_threshodls["PRESSURE_THRESHOLD_LOW"];
-        PRESSURE_TOLERANCE = data_threshodls["PRESSURE_TOLERANCE"];
-        THRESHOLD_WITHOUT_PRESSURE = data_threshodls["THRESHOLD_WITHOUT_PRESSURE"];
-        WARNING_LIMIT = data_threshodls["WARNING_LIMIT"].as<int>();
-        MAX_VALVE_OPEN_COUNT = data_threshodls["MAX_VALVE_OPEN_COUNT"].as<int>();
-        MONITORING_ENABLED = data_threshodls["MONITORING_ENABLED"].as<bool>();
-        VALVE_OPEN_DURATION = data_threshodls["VALVE_OPEN_DURATION"].as<int>();
-        TIMEOUT_CHECK_PRESSURE = data_threshodls["TIMEOUT_CHECK_PRESSURE"].as<int>();
-        RETRY_OPEN_VALVE = data_threshodls["RETRY_OPEN_VALVE"].as<int>();
-    //}
-        log("[ INFO ] I pass ...");
+    // Save Settings.json
+    if (settingsSave())
+    {
+        request->send(200, dataType, "{ \"save\": true }");
+    }
+    else
+    {
+        request->send(500, dataType, "{ \"save\": false }");
+    }
+}
+// -------------------------------------------------------------------
+// Método POST iSumotex timeout
+// -------------------------------------------------------------------
+void putRequestTimeout(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+    /* if(!request->authenticate(device_old_user, device_old_password))
+        return request->requestAuthentication(); */
+    const char *dataType = "application/json";
+    String bodyContent = GetBodyContent(data, len);
+    StaticJsonDocument<1536> doc;
+    DeserializationError error = deserializeJson(doc, bodyContent);
+    if (error)
+    {
+        request->send(400, dataType, "{ \"status\": \"Error de JSON enviado\" }");
+        return;
+    };
+    JsonObject data_timeout = doc["data"]["timeout"]; // DOC = data.threshodls
+                                                      // serializeJsonPretty(data_threshodls, Serial);
+    //   -------------------------------------------------------------------
+    //   Cloud Conexión settings.json
+    //   -------------------------------------------------------------------
+    VALVE_OPEN_DURATION = data_timeout["VALVE_OPEN_DURATION"].as<int>();
+    TIMEOUT_CHECK_PRESSURE = data_timeout["TIMEOUT_CHECK_PRESSURE"].as<int>();
+    RETRY_OPEN_VALVE = data_timeout["RETRY_OPEN_VALVE"].as<int>();
+
+    // Save Settings.json
+    if (settingsSave())
+    {
+        request->send(200, dataType, "{ \"save\": true }");
+    }
+    else
+    {
+        request->send(500, dataType, "{ \"save\": false }");
+    }
+}
+// -------------------------------------------------------------------
+// Método POST iSumotex io
+// -------------------------------------------------------------------
+void putRequestIO(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+    /* if(!request->authenticate(device_old_user, device_old_password))
+        return request->requestAuthentication(); */
+    const char *dataType = "application/json";
+    String bodyContent = GetBodyContent(data, len);
+    StaticJsonDocument<1536> doc;
+    DeserializationError error = deserializeJson(doc, bodyContent);
+    if (error)
+    {
+        request->send(400, dataType, "{ \"status\": \"Error de JSON enviado\" }");
+        return;
+    };
+    JsonObject data_io = doc["data"]["io"]; // DOC = data.io
+                                                // serializeJsonPretty(data_threshodls, Serial);
+    //   -------------------------------------------------------------------
+    //   Cloud Conexión settings.json
+    //   -------------------------------------------------------------------
+    type_sensor_ai_0        = data_io["analog"]["ai_0"][0].as<float>();
+    type_sensor_ai_1        = data_io["analog"]["ai_1"][0].as<float>();
+    val_ai_sensor_0         = data_io["analog"]["ai_0"][1];
+    val_ai_sensor_1         = data_io["analog"]["ai_1"][1];
+    enable_ai_sensor_0      = data_io["analog"]["ai_0"][2].as<bool>();
+    enable_ai_sensor_1      = data_io["analog"]["ai_1"][2].as<bool>();
+    // Variables Digital inputs
+    name_sensor_di_0        = data_io["inputs"]["di_0"][0].as<String>();
+    name_sensor_di_1        = data_io["inputs"]["di_1"][0].as<String>();
+    status_di_sensor_0      = data_io["inputs"]["di_0"][1].as<bool>();
+    status_di_sensor_1      = data_io["inputs"]["di_1"][1].as<bool>();
+    enable_di_sensor_0      = data_io["inputs"]["di_0"][2].as<bool>();
+    enable_di_sensor_1      = data_io["inputs"]["di_1"][2].as<bool>();
+    // Variables Digital outputs
+    name_sensor_do[0]       = data_io["relay"]["do_0"][0].as<String>();
+    name_sensor_do[1]       = data_io["relay"]["do_1"][0].as<String>();
+    name_sensor_do[2]       = data_io["relay"]["do_2"][0].as<String>();
+    name_sensor_do[3]       = data_io["relay"]["do_3"][0].as<String>();
+    activate_do_sensor[0]   = data_io["relay"]["do_0"][1].as<bool>();
+    activate_do_sensor[1]   = data_io["relay"]["do_1"][1].as<bool>();
+    activate_do_sensor[2]   = data_io["relay"]["do_2"][1].as<bool>();
+    activate_do_sensor[3]   = data_io["relay"]["do_3"][1].as<bool>();
+    enable_do_sensor[0]     = data_io["relay"]["do_0"][2].as<bool>();
+    enable_do_sensor[1]     = data_io["relay"]["do_1"][2].as<bool>();
+    enable_do_sensor[2]     = data_io["relay"]["do_2"][2].as<bool>();
+    enable_do_sensor[3]     = data_io["relay"]["do_3"][2].as<bool>();
+
     // Save Settings.json
     if (settingsSave())
     {
@@ -719,66 +866,6 @@ void handleDashMinCSS(AsyncWebServerRequest *request)
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
 }
-// -------------------------------------------------------------------
-// Método PUT Time
-// -------------------------------------------------------------------
-void putRequestTime(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
-{
-    /* if(!request->authenticate(device_old_user, device_old_password))
-        return request->requestAuthentication();  */
-    const char *dataType = "application/json";
-
-    String bodyContent = GetBodyContent(data, len);
-
-    StaticJsonDocument<320> doc;
-    DeserializationError error = deserializeJson(doc, bodyContent);
-    if (error)
-    {
-        request->send(400, dataType, "{ \"status\": \"Error de JSON enviado\" }");
-        return;
-    };
-    // -------------------------------------------------------------------
-    // Time settings.json
-    // -------------------------------------------------------------------
-    String s = "";
-    // Manual - Internet true/false
-    time_ajuste = doc["time_ajuste"].as<bool>();
-    // Fecha - Hora
-    if (doc["time_date"] != "")
-    {
-        s = doc["time_date"].as<String>();
-        s.trim();
-        strlcpy(time_date, s.c_str(), sizeof(time_date));
-        s = "";
-    }
-    // Numero de la zona Horaria
-    if (doc["time_z_horaria"] != "")
-    {
-        time_z_horaria = doc["time_z_horaria"].as<float>() * 3600;
-    }
-    // Servidor NTP
-    if (doc["time_server"] != "")
-    {
-        s = doc["time_server"].as<String>();
-        s.trim();
-        strlcpy(time_server, s.c_str(), sizeof(time_server));
-        s = "";
-    }
-
-    // Save Settings.json
-    if (settingsSave())
-    {
-        request->send(200, dataType, "{ \"save\": true }");
-        log("[ INFO ] Time Set OK");
-        // Esperar la Transmisión de los datos seriales
-        Serial.flush();
-        ESP.restart();
-    }
-    else
-    {
-        request->send(500, dataType, "{ \"save\": false }");
-    }
-}
 
 void InitServer()
 {
@@ -898,78 +985,78 @@ void InitServer()
     // a escanear desde otro lugar (ciclo / configuración).
     // No solicite más de 3-5 segundos. \ ALT + 92
     // -------------------------------------------------------------------
-    // server.on("/api/scan", HTTP_GET, [](AsyncWebServerRequest *request)
-    //           {
-    //     /* if(!request->authenticate(device_old_user, device_old_password))
-    //         return request->requestAuthentication(); */        
-    //     const char* dataType = "application/json"; 
-    //     String json = "";
-    //     int n = WiFi.scanComplete();
-    //     if(n == -2){
-    //     json = "{";
-    //     json += "\"meta\": { \"serial\": \""+ deviceID() +"\", \"count\": 0},";
-    //     json += "\"data\": [";
-    //     json += "],";   
-    //     json += "\"code\": 0 ";
-    //     json += "}";
-    //     WiFi.scanNetworks(true, true); 
-    //     } else if(n){
-    //         json = "{";
-    //         json += "\"meta\": { \"serial\": \""+ deviceID() +"\", \"count\":"+String(n)+"},";
-    //         json += "\"data\": [";
-    //         for (int i = 0; i < n; ++i){
-    //             if(i) json += ",";
-    //             json += "{";
-    //             json += "\"n\":"+String(i+1);
-    //             json += ",\"rssi\":"+String(WiFi.RSSI(i));
-    //             json += ",\"ssid\":\""+WiFi.SSID(i)+"\"";
-    //             json += ",\"bssid\":\""+WiFi.BSSIDstr(i)+"\"";
-    //             json += ",\"channel\":"+String(WiFi.channel(i));
-    //             json += ",\"secure\":\""+ EncryptionType(WiFi.encryptionType(i)) +"\"";
-    //             json += "}";
-    //         }
-    //         json += "],";   
-    //         json += "\"code\": 1 ";
-    //         json += "}";
-    //         WiFi.scanDelete();
-    //         if(WiFi.scanComplete() == -2){
-    //             WiFi.scanNetworks(true, true);
-    //         }
-    //     }
-    //     request->send(200, dataType, json); });
+    server.on("/api/scan", HTTP_GET, [](AsyncWebServerRequest *request)
+              {
+        /* if(!request->authenticate(device_old_user, device_old_password))
+            return request->requestAuthentication(); */        
+        const char* dataType = "application/json"; 
+        String json = "";
+        int n = WiFi.scanComplete();
+        if(n == -2){
+        json = "{";
+        json += "\"meta\": { \"serial\": \""+ deviceID() +"\", \"count\": 0},";
+        json += "\"data\": [";
+        json += "],";   
+        json += "\"code\": 0 ";
+        json += "}";
+        WiFi.scanNetworks(true, true); 
+        } else if(n){
+            json = "{";
+            json += "\"meta\": { \"serial\": \""+ deviceID() +"\", \"count\":"+String(n)+"},";
+            json += "\"data\": [";
+            for (int i = 0; i < n; ++i){
+                if(i) json += ",";
+                json += "{";
+                json += "\"n\":"+String(i+1);
+                json += ",\"rssi\":"+String(WiFi.RSSI(i));
+                json += ",\"ssid\":\""+WiFi.SSID(i)+"\"";
+                json += ",\"bssid\":\""+WiFi.BSSIDstr(i)+"\"";
+                json += ",\"channel\":"+String(WiFi.channel(i));
+                json += ",\"secure\":\""+ EncryptionType(WiFi.encryptionType(i)) +"\"";
+                json += "}";
+            }
+            json += "],";   
+            json += "\"code\": 1 ";
+            json += "}";
+            WiFi.scanDelete();
+            if(WiFi.scanComplete() == -2){
+                WiFi.scanNetworks(true, true);
+            }
+        }
+        request->send(200, dataType, json); });
     // -------------------------------------------------------------------
     // Parámetros de Configuración Cloud
     // url: /api/cloud
     // Método: GET
     // -------------------------------------------------------------------
-    // server.on("/api/cloud", HTTP_GET, [](AsyncWebServerRequest *request)
-    //           {
-    //     /* if(!request->authenticate(device_old_user, device_old_password)) 
-    //         return request->requestAuthentication(); */
-    //     const char* dataType = "application/json"; 
-    //     String json = "";
-    //     json = "{";
-    //     json += "\"meta\": { \"serial\": \""+ deviceID() +"\"},";
-    //     json += "\"data\":{";
-    //         json += "\"connection\": {";       
-    //             mqtt_cloud_enable ? json += "\"mqtt_cloud_enable\": true" : json += "\"mqtt_cloud_enable\": false";    
-    //             json += ",\"mqtt_user\": \""+ String(mqtt_user) +"\"";               
-    //             json += ",\"mqtt_password\": \"""\"";
-    //             json += ",\"mqtt_server\": \""+ String(mqtt_server) +"\"";
-    //             json += ",\"mqtt_cloud_id\": \""+ String( mqtt_cloud_id) +"\"";
-    //             json += ",\"mqtt_port\":"+ String(mqtt_port);   
-    //             mqtt_retain ? json += ",\"mqtt_retain\": true" : json += ",\"mqtt_retain\": false";  
-    //             json += ",\"mqtt_qos\":"+ String(mqtt_qos);                  
-    //         json += "},"; 
-    //         json += "\"datos\": {"; 
-    //             mqtt_time_send ? json += "\"mqtt_time_send\": true" : json += "\"mqtt_time_send\": false";
-    //             json += ",\"mqtt_time_interval\":"+ String(mqtt_time_interval/1000); // 30s = 30000
-    //             mqtt_status_send ? json += ",\"mqtt_status_send\": true" : json += ",\"mqtt_status_send\": false";
-    //         json += "}"; 
-    //     json += "},";   
-    //     json += "\"code\": 1 ";
-    //     json += "}";
-    //     request->send(200, dataType, json); });
+    server.on("/api/cloud", HTTP_GET, [](AsyncWebServerRequest *request)
+              {
+        /* if(!request->authenticate(device_old_user, device_old_password)) 
+            return request->requestAuthentication(); */
+        const char* dataType = "application/json"; 
+        String json = "";
+        json = "{";
+        json += "\"meta\": { \"serial\": \""+ deviceID() +"\"},";
+        json += "\"data\":{";
+            json += "\"connection\": {";       
+                mqtt_cloud_enable ? json += "\"mqtt_cloud_enable\": true" : json += "\"mqtt_cloud_enable\": false";    
+                json += ",\"mqtt_user\": \""+ String(mqtt_user) +"\"";               
+                json += ",\"mqtt_password\": \"""\"";
+                json += ",\"mqtt_server\": \""+ String(mqtt_server) +"\"";
+                json += ",\"mqtt_cloud_id\": \""+ String( mqtt_cloud_id) +"\"";
+                json += ",\"mqtt_port\":"+ String(mqtt_port);   
+                mqtt_retain ? json += ",\"mqtt_retain\": true" : json += ",\"mqtt_retain\": false";  
+                json += ",\"mqtt_qos\":"+ String(mqtt_qos);                  
+            json += "},"; 
+            json += "\"datos\": {"; 
+                mqtt_time_send ? json += "\"mqtt_time_send\": true" : json += "\"mqtt_time_send\": false";
+                json += ",\"mqtt_time_interval\":"+ String(mqtt_time_interval/1000); // 30s = 30000
+                mqtt_status_send ? json += ",\"mqtt_status_send\": true" : json += ",\"mqtt_status_send\": false";
+            json += "}"; 
+        json += "},";   
+        json += "\"code\": 1 ";
+        json += "}";
+        request->send(200, dataType, json); });
     // Actualizar las configuraciones del Cloud Conexiones
     // url: /api/cloud/connection
     // Método: PUT
@@ -1106,33 +1193,96 @@ void InitServer()
         const char* dataType = "application/json"; 
         String json = "";
         json = "{";
-        json += "\"meta\": { \"serial\": \"" + deviceID() + "\"},";
-        json += "\"data\":{";
-                json += "\"thresholds\": {";
-                json += "\"PRESSURE_TARGET\": \""+ String(PRESSURE_TARGET)+"\"";   
-                json += ",\"PRESSURE_THRESHOLD_HIGH\": \""+ String(PRESSURE_THRESHOLD_HIGH)+"\"";                  
-                json += ",\"PRESSURE_THRESHOLD_LOW\": \""+ String(PRESSURE_THRESHOLD_LOW)+"\"";                  
-                json += ",\"PRESSURE_TOLERANCE\": \""+ String(PRESSURE_TOLERANCE)+"\"";                  
-                json += ",\"THRESHOLD_WITHOUT_PRESSURE\": \""+ String(THRESHOLD_WITHOUT_PRESSURE)+"\"";                  
-                json += ",\"WARNING_LIMIT\": \""+ String(WARNING_LIMIT)+"\"";                  
-                json += ",\"MAX_VALVE_OPEN_COUNT\": \""+ String(MAX_VALVE_OPEN_COUNT)+"\"";
-                MONITORING_ENABLED? json += ",\"MONITORING_ENABLED\": true" : json += ",\"MONITORING_ENABLED\": false";                              
+            json += "\"meta\": { \"serial\": \"" + deviceID() + "\"},";
+            json += "\"data\":{";
+                    json += "\"thresholds\": {";
+                        json += "\"PRESSURE_TARGET\": \""+ String(PRESSURE_TARGET)+"\"";   
+                        json += ",\"PRESSURE_THRESHOLD_HIGH\": \""+ String(PRESSURE_THRESHOLD_HIGH)+"\"";                  
+                        json += ",\"PRESSURE_THRESHOLD_LOW\": \""+ String(PRESSURE_THRESHOLD_LOW)+"\"";                  
+                        json += ",\"PRESSURE_TOLERANCE\": \""+ String(PRESSURE_TOLERANCE)+"\"";                  
+                        json += ",\"THRESHOLD_WITHOUT_PRESSURE\": \""+ String(THRESHOLD_WITHOUT_PRESSURE)+"\"";                  
+                        json += ",\"WARNING_LIMIT\": \""+ String(WARNING_LIMIT)+"\"";                  
+                        json += ",\"MAX_VALVE_OPEN_COUNT\": \""+ String(MAX_VALVE_OPEN_COUNT)+"\"";
+                        MONITORING_ENABLED? json += ",\"MONITORING_ENABLED\": true" : json += ",\"MONITORING_ENABLED\": false";                              
+                    json += "},";
+                    json += "\"timeout\": {";
+                        json += "\"VALVE_OPEN_DURATION\": \""+ String(VALVE_OPEN_DURATION)+"\"";   
+                        json += ",\"TIMEOUT_CHECK_PRESSURE\": \""+ String(TIMEOUT_CHECK_PRESSURE)+"\"";   
+                        json += ",\"RETRY_OPEN_VALVE\": \""+ String(RETRY_OPEN_VALVE)+"\"";    
+                    json += "},";
+                    json += "\"io\": {";
+                    json += "\"inputs\": {";
+                            json += "\"di_0\": [";
+                                json += "\""+ name_sensor_di_0+"\"";
+                                status_di_sensor_0 ? json += ",true" : json += ",false";
+                                enable_di_sensor_0 ?json += ",true" : json += ",false";                                                                                            
+                            json += "]";
+                            json += ",\"di_1\": [";
+                                json += "\""+ name_sensor_di_1+"\"";
+                                status_di_sensor_1 ? json += ",true" : json += ",false";
+                                enable_di_sensor_1 ?json += ",true" : json += ",false";                                                                                            
+                            json += "]";                       
+                        json += "},";
+                        json += "\"analog\": {";
+                            json += "\"ai_0\": [";
+                                json += "\""+ String(type_sensor_ai_0) +"\"";
+                                json += ",\""+ String(val_ai_sensor_0) +"\"";
+                                enable_ai_sensor_0 ? json += ",true" : json += ",false";                                                                                        
+                            json += "]";
+                            json += ",\"ai_1\": [";
+                                json += "\""+ String(type_sensor_ai_1) +"\"";
+                                json += ",\""+ String(val_ai_sensor_1) +"\"";
+                                enable_ai_sensor_1 ? json += ",true" : json += ",false";                                                                                        
+                            json += "]";                     
+                        json += "},";                                        
+                        json += "\"relay\": {";
+                            json += "\"do_0\": [";
+                                json += "\""+ name_sensor_do[0]+"\"";
+                                activate_do_sensor[0] ? json += ",true" : json += ",false";
+                                enable_do_sensor[0] ?json += ",true" : json += ",false";                                                                                            
+                            json += "]";
+                            json += ",\"do_1\": [";
+                                json += "\""+ name_sensor_do[0]+"\"";
+                                activate_do_sensor[1] ? json += ",true" : json += ",false";
+                                enable_do_sensor[1] ?json += ",true" : json += ",false";                                                                                            
+                            json += "]";
+                            json += ",\"do_2\": [";
+                                json += "\""+ name_sensor_do[2]+"\"";
+                                activate_do_sensor[2] ? json += ",true" : json += ",false";
+                                enable_do_sensor[2] ? json += ",true" : json += ",false";                                                                                            
+                            json += "]";                        
+                            json += ",\"do_3\": [";
+                                json += "\""+ name_sensor_do[3]+"\"";
+                                activate_do_sensor[3] ? json += ",true" : json += ",false";
+                                enable_do_sensor[3] ? json += ",true" : json += ",false";                                                                                            
+                            json += "]";
+                        json += "}";
+                    json += "}";                    
             json += "},";
-            json += "\"timeout\": {";
-                json += "\"VALVE_OPEN_DURATION\": \""+ String(VALVE_OPEN_DURATION)+"\"";   
-                json += ",\"TIMEOUT_CHECK_PRESSURE\": \""+ String(TIMEOUT_CHECK_PRESSURE)+"\"";   
-                json += ",\"RETRY_OPEN_VALVE\": \""+ String(RETRY_OPEN_VALVE)+"\"";    
-                json += "}";               
-        json += "},";  
-        json += "\"code\": 1 ";
-        json += "}";    
-        request->send(200, dataType, json); });
+            json += "\"code\": 1 ";
+        json += "}";
+                request->send(200, dataType, json); });
     // -------------------------------------------------------------------
     // Actualizar las configuraciones del Isumotex threshodls
     // url: /api/isumotex/threshodls
     // Método: POST
     // -------------------------------------------------------------------
-    server.on("/api/isumotex/thresholds", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, putRequestThresholds);
+    server.on(
+        "/api/isumotex/thresholds", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, putRequestThresholds);
+    // -------------------------------------------------------------------
+    // Actualizar las configuraciones del Isumotex timeout
+    // url: /api/isumotex/timeout
+    // Método: POST
+    // -------------------------------------------------------------------
+    server.on(
+        "/api/isumotex/timeout", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, putRequestTimeout);
+    // -------------------------------------------------------------------
+    // Actualizar las configuraciones del Isumotex io
+    // url: /api/isumotex/timeout
+    // Método: POST
+    // -------------------------------------------------------------------
+    server.on(
+        "/api/isumotex/io", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, putRequestIO);        
     // -------------------------------------------------------------------
     // Zona Servidor Web VUE
     // -------------------------------------------------------------------

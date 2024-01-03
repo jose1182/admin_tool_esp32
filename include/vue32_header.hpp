@@ -8,7 +8,7 @@
 // Asistente ArduinoJson: https://arduinojson.org/v6/assistant/
 // Documentación: https://arduinojson.org/v6/api/json/deserializejson/
 // -------------------------------------------------------------------
-const size_t capacitySettings = 2048;
+const size_t capacitySettings = 3072;
 // -------------------------------------------------------------------
 // Versión de Firmware desde las variables de entorno platformio.ini
 // -------------------------------------------------------------------
@@ -18,8 +18,8 @@ String device_fw_version = ESCAPEQUOTE(BUILD_TAG);
 // -------------------------------------------------------------------
 // Version de Hardware y Fabricante
 // -------------------------------------------------------------------
-#define device_hw_version "ADMINVUE32 v1 00000000" // Versión del hardware
-#define device_manufacturer "IOTHOST"              // Fabricante
+#define device_hw_version "iSumotex v1 00000000" // Versión del hardware
+#define device_manufacturer "SUMCAB ROBOTICS"     // Fabricante
 // -------------------------------------------------------------------
 // Zona configuración Dispositivo
 // -------------------------------------------------------------------
@@ -96,6 +96,8 @@ int time_yr; // Año 2023
 WiFiUDP ntpUDP;
 NTPClient ntpClient(ntpUDP);
 
+long lastTime = 0; // Variable para tiempo de envio por WS
+
 // -------------------------------------------------------------------
 // Zona Isumotex variables
 // -------------------------------------------------------------------
@@ -112,7 +114,44 @@ bool MONITORING_ENABLED;
 int VALVE_OPEN_DURATION;    // Timeout de válvula abierta sin habaer alcanzado a cerrar
 int TIMEOUT_CHECK_PRESSURE; // Ventana de timepo de comprobración si la válvula ha intenado ah abierto y cerrado
 int RETRY_OPEN_VALVE;       // Intentos que abrirá la valvula en un tiempo determinado -> VAL_OPEN_DURATION
+// -------------------------------------------------------------------
+// Zona Isumotex I/O
+// -------------------------------------------------------------------
 
-long lastTime = 0; // Variable para tiempo de envio por WS
+// Definitions
+//Analog inputs
+#define AI_0 12 // GPIOXX Analog input for sensor 1 o 2 4-20mA
+#define AI_1 13 // GPIOXX Analog input for sensor 1 o 2 4-20mA
+//Digital inputs
+#define DI_0 13 // GPIOXX Digital input for readng from external input
+#define DI_1 13 // GPIOXX Digital input for readng from external input
+//Outpus Relays
+#define DO_0 32 // GPIOXX Digital output for readng activate a external device
+#define DO_1 33 // GPIOXX Digital output for readng activate a external device
+#define DO_2 34 // GPIOXX Digital output for readng activate a external device
+#define DO_3 35 // GPIOXX Digital output for readng activate a external device
+//Definitons pines outputs
+uint8_t relay_pin[] = {DO_0, DO_1, DO_2, DO_3};
+// Variables Analog inputs
+long type_sensor_ai_0;
+long type_sensor_ai_1;
+double val_ai_sensor_0 = 0.0;
+double val_ai_sensor_1 = 0.0;
+bool enable_ai_sensor_0;
+bool enable_ai_sensor_1;
 
+// Variables Digital inputs
+String name_sensor_di_0;
+String name_sensor_di_1;
+bool status_di_sensor_0;
+bool status_di_sensor_1;
+bool enable_di_sensor_0;
+bool enable_di_sensor_1;
+
+// Variables Digital outputs
+String name_sensor_do[4];
+bool activate_do_sensor[4];
+bool enable_do_sensor[4];
+
+//Delete if is not using
 bool analog_read_sensor;
